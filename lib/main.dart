@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-import 'openstreetmap.dart'; // Importez le fichier openstreetmap.dart
+import 'widgets/openstreetmap.dart'; // Importez le fichier openstreetmap.dart
 
 void main() {
   runApp(const MyApp());

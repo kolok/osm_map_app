@@ -40,6 +40,7 @@ dependencies:
   latlong2: ^0.9.1  # Utilisé pour les coordonnées géographiques
   url_launcher: ^6.3.1  # Utilisé pour ouvrir une URL
   geolocator: ^13.0.1 # Utilisé pour obtenir la position de l'utilisateur
+  http: ^1.2.2 # Utilisé pour les requêtes HTTP
 
 dev_dependencies:
   flutter_test:
