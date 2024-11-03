@@ -1,46 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-import 'second_screen.dart';
-import 'widgets/custom_app_bar.dart';
-import 'widgets/openstreetmap.dart'; // Importez le fichier openstreetmap.dart
+import 'package:latlong2/latlong.dart';
+import 'jean_fequoi.dart'; // Importez le fichier first_screen.dart
 
 void main() {
-  runApp(const MyApp());
+  runApp(const JeanJean());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class JeanJean extends StatefulWidget {
+  const JeanJean({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Carte avec OpenStreetMap',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const CarteScreen(),
-    );
-  }
+  _JeanJeanState createState() => _JeanJeanState();
 }
 
-
-class CarteScreen extends StatefulWidget {
-  const CarteScreen({super.key});
-
-  @override
-  CarteScreenState createState() => CarteScreenState();
-}
-
-class CarteScreenState extends State<CarteScreen> {
+class _JeanJeanState extends State<JeanJean> {
   LatLng _currentPosition = const LatLng(48.8566, 2.3522); // Coordonnées par défaut pour Paris, France
-  final MapController _mapController = MapController();
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
+    //_getCurrentLocation();
   }
 
   Future<void> _getCurrentLocation() async {
@@ -72,22 +52,17 @@ class CarteScreenState extends State<CarteScreen> {
     Position position = await Geolocator.getCurrentPosition();
     setState(() {
       _currentPosition = LatLng(position.latitude, position.longitude);
-      _mapController.move(_currentPosition, 13.0);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(
-        title: "Jean Féquoi",
-        nextScreen: SecondScreen(),
+    return MaterialApp(
+      title: 'Jean Jean',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
-      body: OpenStreetMap(
-        mapController: _mapController,
-        initialPosition: _currentPosition,
-      ),
+      home: JeanFequoi(initialPosition: _currentPosition),
     );
   }
-
 }
