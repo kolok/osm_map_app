@@ -20,7 +20,7 @@ class _JeanJeanState extends State<JeanJean> {
   @override
   void initState() {
     super.initState();
-    //_getCurrentLocation();
+    _getCurrentLocation();
   }
 
   Future<void> _getCurrentLocation() async {
@@ -62,7 +62,7 @@ class _JeanJeanState extends State<JeanJean> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: JeanFequoi(initialPosition: _currentPosition),
+      home: JeanFequoi(initialPosition: _currentPosition, zoom: 13.0),
     );
   }
 }

@@ -7,8 +7,9 @@ import 'jean_fequoi.dart'; // Importez le fichier jean_fequoi.dart
 
 class JeanTrouvou extends StatefulWidget {
   final LatLng initialPosition;
+  final double zoom;
 
-  const JeanTrouvou({super.key, required this.initialPosition});
+  const JeanTrouvou({super.key, required this.initialPosition, required this.zoom});
 
   @override
   JeanTrouvouState createState() => JeanTrouvouState();
@@ -22,12 +23,13 @@ class JeanTrouvouState extends State<JeanTrouvou> {
     return Scaffold(
       appBar: CustomAppBar(
         title: "Jean Trouvou",
-        nextScreen: ({required LatLng initialPosition}) => JeanFequoi(initialPosition: initialPosition),
+        nextScreen: ({required LatLng initialPosition, required double zoom}) => JeanFequoi(initialPosition: initialPosition, zoom: zoom),
         mapController: _mapController,
       ),
       body: OpenStreetMap(
         mapController: _mapController,
         initialPosition: widget.initialPosition,
+        zoom: widget.zoom,
       ),
     );
   }

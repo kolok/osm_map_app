@@ -7,8 +7,9 @@ import 'widgets/custom_app_bar.dart'; // Importez le fichier custom_app_bar.dart
 
 class JeanFequoi extends StatefulWidget {
   final LatLng initialPosition;
+  final double zoom;
 
-  const JeanFequoi({super.key, required this.initialPosition});
+  const JeanFequoi({super.key, required this.initialPosition, required this.zoom});
 
   @override
   JeanFequoiState createState() => JeanFequoiState();
@@ -22,12 +23,13 @@ class JeanFequoiState extends State<JeanFequoi> {
     return Scaffold(
       appBar: CustomAppBar(
         title: "Jean Féquoi",
-        nextScreen: ({required LatLng initialPosition}) => JeanTrouvou(initialPosition: initialPosition),
+        nextScreen: ({required LatLng initialPosition, required double zoom}) => JeanTrouvou(initialPosition: initialPosition, zoom: zoom),
         mapController: _mapController,
       ),
       body: OpenStreetMap(
         mapController: _mapController,
         initialPosition: widget.initialPosition,
+        zoom: widget.zoom,
       ),
     );
   }

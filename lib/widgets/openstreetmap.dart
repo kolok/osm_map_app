@@ -13,18 +13,20 @@ import 'plugins/zoombuttons_plugin.dart';
 class OpenStreetMap extends StatefulWidget {
   final MapController mapController;
   final LatLng initialPosition;
+  final double zoom;
 
   const OpenStreetMap({
     super.key,
     required this.mapController,
     required this.initialPosition,
+    required this.zoom,
   });
 
   @override
-  _OpenStreetMapState createState() => _OpenStreetMapState();
+  OpenStreetMapState createState() => OpenStreetMapState();
 }
 
-class _OpenStreetMapState extends State<OpenStreetMap> {
+class OpenStreetMapState extends State<OpenStreetMap> {
   List<Marker> _markers = [];
   String _selectedActorName = '';
   final PanelController _panelController = PanelController();
@@ -85,7 +87,7 @@ class _OpenStreetMapState extends State<OpenStreetMap> {
             mapController: widget.mapController,
             options: MapOptions(
               initialCenter: widget.initialPosition,
-              initialZoom: 13.0,
+              initialZoom: widget.zoom,
             ),
             children: [
               TileLayer(

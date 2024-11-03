@@ -4,7 +4,7 @@ import 'package:latlong2/latlong.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  final Widget Function({required LatLng initialPosition}) nextScreen;
+  final Widget Function({required LatLng initialPosition, required double zoom}) nextScreen;
   final MapController mapController;
 
   const CustomAppBar({
@@ -42,9 +42,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  Route _createRoute(Widget Function({required LatLng initialPosition}) screen, LatLng center, double zoom, AxisDirection direction) {
+  Route _createRoute(Widget Function({required LatLng initialPosition, required double zoom}) screen, LatLng center, double zoom, AxisDirection direction) {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => screen(initialPosition: center),
+      pageBuilder: (context, animation, secondaryAnimation) => screen(initialPosition: center, zoom: zoom),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);
         const end = Offset.zero;
