@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'widgets/openstreetmap.dart'; // Importez le fichier openstreetmap.dart
-import 'jean_trouvou.dart'; // Importez le fichier second_screen.dart
+import 'jean_trouvou.dart'; // Importez le fichier jean_trouvou.dart
 import 'widgets/custom_app_bar.dart'; // Importez le fichier custom_app_bar.dart
 
 class JeanFequoi extends StatefulWidget {
@@ -22,7 +22,8 @@ class JeanFequoiState extends State<JeanFequoi> {
     return Scaffold(
       appBar: CustomAppBar(
         title: "Jean Féquoi",
-        nextScreen: JeanTrouvou(initialPosition: widget.initialPosition),
+        nextScreen: ({required LatLng initialPosition}) => JeanTrouvou(initialPosition: initialPosition),
+        mapController: _mapController,
       ),
       body: OpenStreetMap(
         mapController: _mapController,
