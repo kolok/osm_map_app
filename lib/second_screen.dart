@@ -1,39 +1,19 @@
+import 'main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-import 'second_screen.dart';
 import 'widgets/custom_app_bar.dart';
 import 'widgets/openstreetmap.dart'; // Importez le fichier openstreetmap.dart
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class SecondScreen extends StatefulWidget {
+  const SecondScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Carte avec OpenStreetMap',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const CarteScreen(),
-    );
-  }
+  SecondScreenState createState() => SecondScreenState();
 }
 
-
-class CarteScreen extends StatefulWidget {
-  const CarteScreen({super.key});
-
-  @override
-  CarteScreenState createState() => CarteScreenState();
-}
-
-class CarteScreenState extends State<CarteScreen> {
+class SecondScreenState extends State<SecondScreen> {
   LatLng _currentPosition = const LatLng(48.8566, 2.3522); // Coordonnées par défaut pour Paris, France
   final MapController _mapController = MapController();
 
@@ -80,8 +60,8 @@ class CarteScreenState extends State<CarteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(
-        title: "Jean Féquoi",
-        nextScreen: SecondScreen(),
+        title: "Jean Trouvou",
+        nextScreen: CarteScreen(),
       ),
       body: OpenStreetMap(
         mapController: _mapController,
@@ -89,5 +69,4 @@ class CarteScreenState extends State<CarteScreen> {
       ),
     );
   }
-
 }
