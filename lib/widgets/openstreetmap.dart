@@ -116,7 +116,9 @@ class OpenStreetMapState extends State<OpenStreetMap> {
             SlidingUpPanel(
               controller: _panelController,
               minHeight: MediaQuery.of(context).size.height / 3,
+              snapPoint: 0.5,
               maxHeight: MediaQuery.of(context).size.height,
+              backdropEnabled: true,
               panel: Center(
                 child: Column(
                   children: [
