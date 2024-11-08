@@ -1,4 +1,4 @@
-package com.example.carte_openstreetmap
+package com.kolok.jean_jean
 
 import io.flutter.embedding.android.FlutterActivity
 
