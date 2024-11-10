@@ -71,9 +71,6 @@ class OpenStreetMapState extends State<OpenStreetMap> {
               _selectedActorName = item['nom']?.toString() ?? 'Nom non disponible';
               _selectedMarkerId = markerId;
             });
-            // Ouvrir le panneau après la mise à jour de l'état
-            debugPrint('Open panel `$_selectedActorName`');
-            // _panelController.open();
           },
           child: SvgPicture.asset(
             'assets/images/recycle_pin.svg',
@@ -107,6 +104,9 @@ class OpenStreetMapState extends State<OpenStreetMap> {
             options: MapOptions(
               initialCenter: widget.initialPosition,
               initialZoom: widget.zoom,
+              interactionOptions: InteractionOptions(
+                flags: InteractiveFlag.all - InteractiveFlag.rotate
+              ),
             ),
             children: [
               TileLayer(
