@@ -30,7 +30,38 @@ class JeanFequoiState extends State<JeanFequoi> {
         mapController: _mapController,
         initialPosition: widget.initialPosition,
         zoom: widget.zoom,
+        actionIds: [ 8, 6, 1, 9, 3, 11, 4 ],
       ),
     );
   }
 }
+
+  // ACTION
+  // {
+  //   "id": 8,
+  //   "code": "preter",
+  // },
+  // {
+  //   "id": 6,
+  //   "code": "mettreenlocation",
+  // },
+  // {
+  //   "id": 1,
+  //   "code": "reparer",
+  // },
+  // {
+  //   "id": 9,
+  //   "code": "echanger",
+  // },
+  // {
+  //   "id": 3,
+  //   "code": "revendre",
+  // },
+  // {
+  //   "id": 11,
+  //   "code": "trier",
+  // }
+  // {
+  //   "id": 4,
+  //   "code": "donner",
+  // },

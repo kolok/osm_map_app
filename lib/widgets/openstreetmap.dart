@@ -14,12 +14,14 @@ class OpenStreetMap extends StatefulWidget {
   final MapController mapController;
   final LatLng initialPosition;
   final double zoom;
+  final List<int>? actionIds;
 
   const OpenStreetMap({
     super.key,
     required this.mapController,
     required this.initialPosition,
     required this.zoom,
+    this.actionIds,
   });
 
   @override
@@ -45,8 +47,14 @@ class OpenStreetMapState extends State<OpenStreetMap> {
   }
 
   Future<void> _fetchMarkers(double latitude, double longitude) async {
+    // si actionIds est défini, ajoutez les paramètres de requête &actions=x&actions=y&actions=z
+    String actions = '';
+    if (widget.actionIds != null) {
+      actions = widget.actionIds!.map((id) => '&actions=$id').join('&');
+    }
+
     final response = await http.get(Uri.parse(
-        'https://quefairedemesobjets-preprod.osc-fr1.scalingo.io/api/qfdmo/acteurs?latitude=$latitude&longitude=$longitude&limit=25'));
+        'https://quefairedemesobjets-preprod.osc-fr1.scalingo.io/api/qfdmo/acteurs?latitude=$latitude&longitude=$longitude$actions&limit=25'));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       setState(() {
@@ -62,24 +70,42 @@ class OpenStreetMapState extends State<OpenStreetMap> {
       final markerId = item['identifiant_unique'];
       final isSelected = _selectedMarkerId == markerId;
       return Marker(
-        width: isSelected ? 80.0 : 66.0,
-        height: isSelected ? 100.0 : 81.0,
+        width: isSelected ? 80.0 : 46.0,
+        height: isSelected ? 100.0 : 61.0,
+        
         point: LatLng(item['latitude'], item['longitude']),
+        alignment: Alignment.topCenter,
         child: GestureDetector(
           onTap: () {
             setState(() {
               _selectedActorName = item['nom']?.toString() ?? 'Nom non disponible';
               _selectedMarkerId = markerId;
+              _reorderMarkers();
             });
           },
           child: SvgPicture.asset(
-            'assets/images/recycle_pin.svg',
+            'assets/images/pin.svg',
+            //colorFilter: ColorFilter.mode(Colors.red, BlendMode.modulate),
             fit: BoxFit.fill,
             allowDrawingOutsideViewBox: true,
           ),
         ),
       );
     }).toList();
+  }
+
+  void _reorderMarkers() {
+    if (_selectedMarkerId != null) {
+      _markerData.sort((a, b) {
+        if (a['identifiant_unique'] == _selectedMarkerId) {
+          return 1;
+        } else if (b['identifiant_unique'] == _selectedMarkerId) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
+    }
   }
 
   void _closePanel() {

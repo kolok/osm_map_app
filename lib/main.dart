@@ -11,10 +11,10 @@ class JeanJean extends StatefulWidget {
   const JeanJean({super.key});
 
   @override
-  _JeanJeanState createState() => _JeanJeanState();
+  JeanJeanState createState() => JeanJeanState();
 }
 
-class _JeanJeanState extends State<JeanJean> {
+class JeanJeanState extends State<JeanJean> {
   LatLng _currentPosition = const LatLng(48.8566, 2.3522); // Coordonnées par défaut pour Paris, France
 
   @override
@@ -23,7 +23,7 @@ class _JeanJeanState extends State<JeanJean> {
     _getCurrentLocation();
   }
 
-  Future<void> _getCurrentLocation() async {
+  Future<LatLng> _getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -31,7 +31,7 @@ class _JeanJeanState extends State<JeanJean> {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       // Les services de localisation ne sont pas activés, ne continuez pas
-      return;
+      return const LatLng(48.8566, 2.3522); // Coordonnées par défaut pour Paris, France
     }
 
     permission = await Geolocator.checkPermission();
@@ -39,20 +39,18 @@ class _JeanJeanState extends State<JeanJean> {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         // Les permissions sont refusées, ne continuez pas
-        return;
+        return const LatLng(48.8566, 2.3522); // Coordonnées par défaut pour Paris, France
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
       // Les permissions sont refusées de manière permanente, ne continuez pas
-      return;
+      return const LatLng(48.8566, 2.3522); // Coordonnées par défaut pour Paris, France
     }
 
     // Obtenez la position actuelle de l'utilisateur
     Position position = await Geolocator.getCurrentPosition();
-    setState(() {
-      _currentPosition = LatLng(position.latitude, position.longitude);
-    });
+    return LatLng(position.latitude, position.longitude);
   }
 
   @override
@@ -62,7 +60,32 @@ class _JeanJeanState extends State<JeanJean> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: JeanFequoi(initialPosition: _currentPosition, zoom: 13.0),
+      home: FutureBuilder<LatLng>(
+        future: _getCurrentLocation(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return Scaffold(
+              body: Center(
+                child: Text('Erreur: ${snapshot.error}'),
+              ),
+            );
+          } else if (snapshot.hasData) {
+            return JeanFequoi(initialPosition: snapshot.data!, zoom: 13.0);
+          } else {
+            return const Scaffold(
+              body: Center(
+                child: Text('Impossible d\'obtenir la localisation'),
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 }
