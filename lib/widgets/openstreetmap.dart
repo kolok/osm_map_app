@@ -10,6 +10,8 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 import 'plugins/zoombuttons_plugin.dart';
 
+import '../models/acteur.dart';
+
 class OpenStreetMap extends StatefulWidget {
   final MapController mapController;
   final LatLng initialPosition;
@@ -29,7 +31,7 @@ class OpenStreetMap extends StatefulWidget {
 }
 
 class OpenStreetMapState extends State<OpenStreetMap> {
-  List<dynamic> _markerData = [];
+  List<Acteur> _markerData = [];
   String _selectedActorName = '';
   String? _selectedMarkerId;
   final PanelController _panelController = PanelController();
@@ -58,34 +60,56 @@ class OpenStreetMapState extends State<OpenStreetMap> {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       setState(() {
-        _markerData = data['items'] as List;
+        _markerData = (data['items'] as List).map((item) => Acteur.fromJson(item)).toList();
       });
     } else {
       throw Exception('Failed to load markers');
     }
   }
 
+  String _getIconPath(List<AAction> actions) {
+    const actionIconMap = {
+      'reparer': 'assets/images/pin_reparer.svg',
+      'donner': 'assets/images/pin_donner_echanger.svg',
+      'echanger': 'assets/images/pin_donner_echanger.svg',
+      'preter': 'assets/images/pin_preter_emprunter_louer.svg',
+      'emprunter': 'assets/images/pin_preter_emprunter_louer.svg',
+      'louer': 'assets/images/pin_preter_emprunter_louer.svg',
+      'miseenlocation': 'assets/images/pin_preter_emprunter_louer.svg',
+      'acheter': 'assets/images/pin_acheter_vendre.svg',
+      'vendre': 'assets/images/pin_acheter_vendre.svg',
+      'trier': 'assets/images/pin_trier.svg',
+    };
+
+    for (var action in actions) {
+      if (actionIconMap.containsKey(action.code)) {
+        return actionIconMap[action.code]!;
+      }
+    }
+    return 'assets/images/pin.svg';
+  }
+
   List<Marker> _buildMarkers() {
     return _markerData.map((item) {
-      final markerId = item['identifiant_unique'];
+      final markerId = item.identifiantUnique;
       final isSelected = _selectedMarkerId == markerId;
+      final iconPath = _getIconPath(item.actions);
       return Marker(
-        width: isSelected ? 80.0 : 46.0,
-        height: isSelected ? 100.0 : 61.0,
+        width: isSelected ? 49.0 : 35.0,
+        height: isSelected ? 70.0 : 50.0,
         
-        point: LatLng(item['latitude'], item['longitude']),
+        point: LatLng(item.latitude, item.longitude),
         alignment: Alignment.topCenter,
         child: GestureDetector(
           onTap: () {
             setState(() {
-              _selectedActorName = item['nom']?.toString() ?? 'Nom non disponible';
+              _selectedActorName = item.nom;
               _selectedMarkerId = markerId;
               _reorderMarkers();
             });
           },
           child: SvgPicture.asset(
-            'assets/images/pin.svg',
-            //colorFilter: ColorFilter.mode(Colors.red, BlendMode.modulate),
+            iconPath,
             fit: BoxFit.fill,
             allowDrawingOutsideViewBox: true,
           ),
@@ -97,9 +121,9 @@ class OpenStreetMapState extends State<OpenStreetMap> {
   void _reorderMarkers() {
     if (_selectedMarkerId != null) {
       _markerData.sort((a, b) {
-        if (a['identifiant_unique'] == _selectedMarkerId) {
+        if (a.identifiantUnique == _selectedMarkerId) {
           return 1;
-        } else if (b['identifiant_unique'] == _selectedMarkerId) {
+        } else if (b.identifiantUnique == _selectedMarkerId) {
           return -1;
         } else {
           return 0;
@@ -168,12 +192,6 @@ class OpenStreetMapState extends State<OpenStreetMap> {
               snapPoint: 0.5,
               maxHeight: MediaQuery.of(context).size.height,
               backdropEnabled: true,
-              // onPanelClosed: _closePanel,
-              // onPanelSlide: (position) {
-              //   if (position < 0.3) {
-              //     _closePanel();
-              //   }
-              // },
               panel: Center(
                 child: Column(
                   children: [
