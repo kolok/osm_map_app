@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -11,6 +12,8 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'plugins/zoombuttons_plugin.dart';
 
 import '../models/acteur.dart';
+
+final requestTimeout = const Duration(seconds: 30);
 
 class OpenStreetMap extends StatefulWidget {
   final MapController mapController;
@@ -55,16 +58,44 @@ class OpenStreetMapState extends State<OpenStreetMap> {
       actions = widget.actionIds!.map((id) => '&actions=$id').join('&');
     }
 
-    final response = await http.get(Uri.parse(
-        'https://quefairedemesobjets-preprod.osc-fr1.scalingo.io/api/qfdmo/acteurs?latitude=$latitude&longitude=$longitude$actions&limit=25'));
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      setState(() {
-        _markerData = (data['items'] as List).map((item) => Acteur.fromJson(item)).toList();
-      });
-    } else {
-      throw Exception('Failed to load markers');
+    try {
+      final response = await http.get(Uri.parse(
+          'https://quefairedemesobjets-preprod.osc-fr1.scalingo.io/api/qfdmo/acteurs?latitude=$latitude&longitude=$longitude$actions&limit=25'))
+          .timeout(requestTimeout);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          _markerData = (data['items'] as List).map((item) => Acteur.fromJson(item)).toList();
+        });
+      } else {
+        _showErrorDialog('Erreur ${response.statusCode}', 'Impossible de charger les marqueurs.');
+      }
+    } on TimeoutException catch (_) {
+      _showErrorDialog('Erreur de délai', 'La requête a pris trop de temps.');
+    } catch (e) {
+      _showErrorDialog('Erreur', 'Une erreur s\'est produite.');
     }
+  }
+
+  void _showErrorDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   String _getIconPath(List<AAction> actions) {
@@ -212,3 +243,8 @@ class OpenStreetMapState extends State<OpenStreetMap> {
     );
   }
 }
+
+
+
+
+

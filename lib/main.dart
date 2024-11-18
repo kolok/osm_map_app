@@ -15,7 +15,7 @@ class JeanJean extends StatefulWidget {
 }
 
 class JeanJeanState extends State<JeanJean> {
-  LatLng _currentPosition = const LatLng(48.8566, 2.3522); // Coordonnées par défaut pour Paris, France
+  final LatLng _defaultPosition = const LatLng(48.8566, 2.3522); // Coordonnées par défaut pour Paris, France
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class JeanJeanState extends State<JeanJean> {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       // Les services de localisation ne sont pas activés, ne continuez pas
-      return const LatLng(48.8566, 2.3522); // Coordonnées par défaut pour Paris, France
+      return _defaultPosition; // Coordonnées par défaut pour Paris, France
     }
 
     permission = await Geolocator.checkPermission();
@@ -39,13 +39,13 @@ class JeanJeanState extends State<JeanJean> {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         // Les permissions sont refusées, ne continuez pas
-        return const LatLng(48.8566, 2.3522); // Coordonnées par défaut pour Paris, France
+        return _defaultPosition; // Coordonnées par défaut pour Paris, France
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
       // Les permissions sont refusées de manière permanente, ne continuez pas
-      return const LatLng(48.8566, 2.3522); // Coordonnées par défaut pour Paris, France
+      return _defaultPosition; // Coordonnées par défaut pour Paris, France
     }
 
     // Obtenez la position actuelle de l'utilisateur
