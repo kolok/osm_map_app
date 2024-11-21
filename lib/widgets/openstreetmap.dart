@@ -11,7 +11,8 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 import 'plugins/zoombuttons_plugin.dart';
 
-import '../models/acteur.dart';
+import 'package:jean_jean/models/acteur.dart';
+import 'package:jean_jean/pages/add_actor_form.dart';
 
 final requestTimeout = const Duration(seconds: 30);
 
@@ -35,6 +36,7 @@ class OpenStreetMap extends StatefulWidget {
 
 class OpenStreetMapState extends State<OpenStreetMap> {
   List<Acteur> _markerData = [];
+  List<Acteur> _localActors = [];
   String _selectedActorName = '';
   String? _selectedMarkerId;
   final PanelController _panelController = PanelController();
@@ -98,6 +100,48 @@ class OpenStreetMapState extends State<OpenStreetMap> {
     );
   }
 
+  void _showAddActorDialog(LatLng position) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Ajouter un acteur'),
+          content: Text('Voulez-vous ajouter un acteur de l\'économie circulaire à cet endroit ?'),
+          actions: [
+            TextButton(
+              child: Text('Annuler'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Ajouter'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final result = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => AddActorForm(position: position),
+                  ),
+                );
+                if (result != null) {
+                  setState(() {
+                    _localActors.add(Acteur(
+                      identifiantUnique: DateTime.now().toString(),
+                      latitude: result['position'].latitude,
+                      longitude: result['position'].longitude,
+                      nom: result['nom'],
+                      actions: [AAction(code:'reparer', libelle:'reparer', id:0)], // Ajoutez ici les actions appropriées
+                    ));
+                  });
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   String _getIconPath(List<AAction> actions) {
     const actionIconMap = {
       'reparer': 'assets/images/pin_reparer.svg',
@@ -121,7 +165,9 @@ class OpenStreetMapState extends State<OpenStreetMap> {
   }
 
   List<Marker> _buildMarkers() {
-    return _markerData.map((item) {
+    final allMarkers = [..._markerData, ..._localActors];
+
+    return allMarkers.map((item) {
       final markerId = item.identifiantUnique;
       final isSelected = _selectedMarkerId == markerId;
       final iconPath = _getIconPath(item.actions);
@@ -168,7 +214,6 @@ class OpenStreetMapState extends State<OpenStreetMap> {
       _selectedActorName = '';
       _selectedMarkerId = null;
     });
-    debugPrint('Close panel');
     _panelController.close();
   }
 
@@ -188,6 +233,9 @@ class OpenStreetMapState extends State<OpenStreetMap> {
               interactionOptions: InteractionOptions(
                 flags: InteractiveFlag.all - InteractiveFlag.rotate
               ),
+              onLongPress: (tapPosition, point) {
+                _showAddActorDialog(point);
+              },
             ),
             children: [
               TileLayer(
@@ -243,8 +291,3 @@ class OpenStreetMapState extends State<OpenStreetMap> {
     );
   }
 }
-
-
-
-
-

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'jean_fequoi.dart'; // Importez le fichier first_screen.dart
+import 'pages/jean_fequoi.dart'; // Importez le fichier first_screen.dart
 
 void main() {
   runApp(const JeanJean());

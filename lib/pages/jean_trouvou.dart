@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'widgets/custom_app_bar.dart';
-import 'widgets/openstreetmap.dart'; // Importez le fichier openstreetmap.dart
+import '../widgets/custom_app_bar.dart';
+import '../widgets/openstreetmap.dart'; // Importez le fichier openstreetmap.dart
 import 'jean_fequoi.dart'; // Importez le fichier jean_fequoi.dart
 
 class JeanTrouvou extends StatefulWidget {
