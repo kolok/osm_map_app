@@ -1,20 +1,20 @@
+// lib/presentation/widgets/openstreetmap.dart
+
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:jean_jean/presentation/business_logic/models/aaction.dart';
+import 'package:jean_jean/presentation/widgets/createactordialog.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import 'plugins/zoombuttons_plugin.dart';
-
-import 'package:jean_jean/models/acteur.dart';
-import 'package:jean_jean/pages/add_actor_form.dart';
-
-final requestTimeout = const Duration(seconds: 30);
+import '../business_logic/models/acteur.dart';
+import '../business_logic/services/lvao_api.dart';
+import 'map/slidepanel.dart';
+import 'map/zoombuttons.dart'; // Si vous avez un widget ZoomButtons
 
 class OpenStreetMap extends StatefulWidget {
   final MapController mapController;
@@ -40,6 +40,7 @@ class OpenStreetMapState extends State<OpenStreetMap> {
   String _selectedActorName = '';
   String? _selectedMarkerId;
   final PanelController _panelController = PanelController();
+  final ApiService _apiService = ApiService();
 
   @override
   void initState() {
@@ -50,33 +51,19 @@ class OpenStreetMapState extends State<OpenStreetMap> {
         _fetchMarkers(camera.center.latitude, camera.center.longitude);
       }
     });
-    _fetchMarkers(widget.initialPosition.latitude, widget.initialPosition.longitude);
+    _fetchMarkers(
+        widget.initialPosition.latitude, widget.initialPosition.longitude);
   }
 
   Future<void> _fetchMarkers(double latitude, double longitude) async {
-    // si actionIds est défini, ajoutez les paramètres de requête &actions=x&actions=y&actions=z
-    String actions = '';
-    if (widget.actionIds != null) {
-      actions = widget.actionIds!.map((id) => '&actions=$id').join('&');
-    }
-
     try {
-      final response = await http.get(Uri.parse(
-          'https://quefairedemesobjets-preprod.osc-fr1.scalingo.io/api/qfdmo/acteurs?latitude=$latitude&longitude=$longitude$actions&limit=25'))
-          .timeout(requestTimeout);
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          _markerData = (data['items'] as List).map((item) => Acteur.fromJson(item)).toList();
-        });
-      } else {
-        _showErrorDialog('Erreur ${response.statusCode}', 'Impossible de charger les marqueurs.');
-      }
-    } on TimeoutException catch (_) {
-      _showErrorDialog('Erreur de délai', 'La requête a pris trop de temps.');
+      final markers = await _apiService.fetchMarkers(
+          latitude, longitude, widget.actionIds);
+      setState(() {
+        _markerData = markers;
+      });
     } catch (e) {
-      _showErrorDialog('Erreur', 'Une erreur s\'est produite.');
+      _showErrorDialog('Erreur', e.toString());
     }
   }
 
@@ -97,8 +84,8 @@ class OpenStreetMapState extends State<OpenStreetMap> {
           ],
         );
       },
-    );
-  }
+    );  }
+
 
   void _showAddActorDialog(LatLng position) {
     showDialog(
@@ -118,22 +105,7 @@ class OpenStreetMapState extends State<OpenStreetMap> {
               child: Text('Ajouter'),
               onPressed: () async {
                 Navigator.of(context).pop();
-                final result = await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => AddActorForm(position: position),
-                  ),
-                );
-                if (result != null) {
-                  setState(() {
-                    _localActors.add(Acteur(
-                      identifiantUnique: DateTime.now().toString(),
-                      latitude: result['position'].latitude,
-                      longitude: result['position'].longitude,
-                      nom: result['nom'],
-                      actions: [AAction(code:'reparer', libelle:'reparer', id:0)], // Ajoutez ici les actions appropriées
-                    ));
-                  });
-                }
+                _createActor(position);
               },
             ),
           ],
@@ -142,31 +114,32 @@ class OpenStreetMapState extends State<OpenStreetMap> {
     );
   }
 
-  String _getIconPath(List<AAction> actions) {
-    const actionIconMap = {
-      'reparer': 'assets/images/pin_reparer.svg',
-      'donner': 'assets/images/pin_donner_echanger.svg',
-      'echanger': 'assets/images/pin_donner_echanger.svg',
-      'preter': 'assets/images/pin_preter_emprunter_louer.svg',
-      'emprunter': 'assets/images/pin_preter_emprunter_louer.svg',
-      'louer': 'assets/images/pin_preter_emprunter_louer.svg',
-      'miseenlocation': 'assets/images/pin_preter_emprunter_louer.svg',
-      'acheter': 'assets/images/pin_acheter_vendre.svg',
-      'vendre': 'assets/images/pin_acheter_vendre.svg',
-      'trier': 'assets/images/pin_trier.svg',
-    };
 
-    for (var action in actions) {
-      if (actionIconMap.containsKey(action.code)) {
-        return actionIconMap[action.code]!;
-      }
+  void _createActor(LatLng position) async {
+  
+    // Naviguer vers le CreateActorWidget et attendre le résultat
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CreateActorWidget(position: position),
+      ),
+    );
+  
+    // Si le résultat n'est pas nul, ajouter le nouvel acteur au state
+    if (result != null) {
+      setState(() {
+        _localActors.add(Acteur(
+          identifiantUnique: DateTime.now().toString(),
+          latitude: result['position'].latitude,
+          longitude: result['position'].longitude,
+          nom: result['nom'],
+          actions: [AAction(code: 'reparer', libelle: 'Réparer', id: 0)],
+        ));
+      });
     }
-    return 'assets/images/pin.svg';
   }
 
   List<Marker> _buildMarkers() {
     final allMarkers = [..._markerData, ..._localActors];
-
     return allMarkers.map((item) {
       final markerId = item.identifiantUnique;
       final isSelected = _selectedMarkerId == markerId;
@@ -215,6 +188,28 @@ class OpenStreetMapState extends State<OpenStreetMap> {
       _selectedMarkerId = null;
     });
     _panelController.close();
+  }
+
+  String _getIconPath(List<AAction> actions) {
+    const actionIconMap = {
+      'reparer': 'assets/images/pin_reparer.svg',
+      'donner': 'assets/images/pin_donner_echanger.svg',
+      'echanger': 'assets/images/pin_donner_echanger.svg',
+      'preter': 'assets/images/pin_preter_emprunter_louer.svg',
+      'emprunter': 'assets/images/pin_preter_emprunter_louer.svg',
+      'louer': 'assets/images/pin_preter_emprunter_louer.svg',
+      'miseenlocation': 'assets/images/pin_preter_emprunter_louer.svg',
+      'acheter': 'assets/images/pin_acheter_vendre.svg',
+      'vendre': 'assets/images/pin_acheter_vendre.svg',
+      'trier': 'assets/images/pin_trier.svg',
+    };
+
+    for (var action in actions) {
+      if (actionIconMap.containsKey(action.code)) {
+        return actionIconMap[action.code]!;
+      }
+    }
+    return 'assets/images/pin.svg';
   }
 
   @override
@@ -271,20 +266,10 @@ class OpenStreetMapState extends State<OpenStreetMap> {
               snapPoint: 0.5,
               maxHeight: MediaQuery.of(context).size.height,
               backdropEnabled: true,
-              panel: Center(
-                child: Column(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.close),
-                      onPressed: _closePanel,
-                    ),
-                    Text(
-                      _selectedActorName,
-                      style: TextStyle(fontSize: 24),
-                    ),
-                  ],
-                ),
-              ),
+              panel: PanelWidget(onClose: _closePanel,
+              selectedActorName: _selectedActorName,
+
+              )
             ),
         ],
       ),
