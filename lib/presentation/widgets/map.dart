@@ -7,6 +7,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jean_jean/presentation/business_logic/models/aaction.dart';
 import 'package:jean_jean/presentation/widgets/createactordialog.dart';
+import 'package:jean_jean/presentation/business_logic/models/marker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -36,7 +37,14 @@ class OpenStreetMap extends StatefulWidget {
 
 class OpenStreetMapState extends State<OpenStreetMap> {
   List<Acteur> _markerData = [];
-  List<Acteur> _localActors = [];
+  final List<Acteur> _localActors = [];
+  List<Marker> _markers= [];
+  MarkerBuilder _markerBuilder = MarkerBuilder(
+    markerData: [],
+    localActors: [],
+    selectedMarkerId: '',
+    onMarkerTap: (markerId) {},
+  );
   String _selectedActorName = '';
   String? _selectedMarkerId;
   final PanelController _panelController = PanelController();
@@ -128,56 +136,12 @@ class OpenStreetMapState extends State<OpenStreetMap> {
     if (result != null) {
       setState(() {
         _localActors.add(Acteur(
-          identifiantUnique: DateTime.now().toString(),
+          identifiantUnique: result['identifiantUnique'],
           latitude: result['position'].latitude,
           longitude: result['position'].longitude,
           nom: result['nom'],
           actions: [AAction(code: 'reparer', libelle: 'Réparer', id: 0)],
         ));
-      });
-    }
-  }
-
-  List<Marker> _buildMarkers() {
-    final allMarkers = [..._markerData, ..._localActors];
-    return allMarkers.map((item) {
-      final markerId = item.identifiantUnique;
-      final isSelected = _selectedMarkerId == markerId;
-      final iconPath = _getIconPath(item.actions);
-      return Marker(
-        width: isSelected ? 49.0 : 35.0,
-        height: isSelected ? 70.0 : 50.0,
-        
-        point: LatLng(item.latitude, item.longitude),
-        alignment: Alignment.topCenter,
-        child: GestureDetector(
-          onTap: () {
-            setState(() {
-              _selectedActorName = item.nom;
-              _selectedMarkerId = markerId;
-              _reorderMarkers();
-            });
-          },
-          child: SvgPicture.asset(
-            iconPath,
-            fit: BoxFit.fill,
-            allowDrawingOutsideViewBox: true,
-          ),
-        ),
-      );
-    }).toList();
-  }
-
-  void _reorderMarkers() {
-    if (_selectedMarkerId != null) {
-      _markerData.sort((a, b) {
-        if (a.identifiantUnique == _selectedMarkerId) {
-          return 1;
-        } else if (b.identifiantUnique == _selectedMarkerId) {
-          return -1;
-        } else {
-          return 0;
-        }
       });
     }
   }
@@ -190,32 +154,26 @@ class OpenStreetMapState extends State<OpenStreetMap> {
     _panelController.close();
   }
 
-  String _getIconPath(List<AAction> actions) {
-    const actionIconMap = {
-      'reparer': 'assets/images/pin_reparer.svg',
-      'donner': 'assets/images/pin_donner_echanger.svg',
-      'echanger': 'assets/images/pin_donner_echanger.svg',
-      'preter': 'assets/images/pin_preter_emprunter_louer.svg',
-      'emprunter': 'assets/images/pin_preter_emprunter_louer.svg',
-      'louer': 'assets/images/pin_preter_emprunter_louer.svg',
-      'miseenlocation': 'assets/images/pin_preter_emprunter_louer.svg',
-      'acheter': 'assets/images/pin_acheter_vendre.svg',
-      'vendre': 'assets/images/pin_acheter_vendre.svg',
-      'trier': 'assets/images/pin_trier.svg',
-    };
-
-    for (var action in actions) {
-      if (actionIconMap.containsKey(action.code)) {
-        return actionIconMap[action.code]!;
-      }
-    }
-    return 'assets/images/pin.svg';
-  }
-
   @override
   Widget build(BuildContext context) {
+
+    _markerBuilder = MarkerBuilder(
+      markerData: _markerData,
+      localActors: _localActors,
+      selectedMarkerId: _selectedMarkerId,
+      onMarkerTap: (markerId) {
+        setState(() {
+          final allMarkersData = [..._markerData, ..._localActors];
+          _selectedActorName = allMarkersData
+              .firstWhere((acteur) => acteur.identifiantUnique == markerId)
+              .nom;
+          _selectedMarkerId = markerId;
+        });
+      },
+    );
+
     // Reconstruire les marqueurs avec la taille mise à jour
-    List<Marker> markers = _buildMarkers();
+    _markers = _markerBuilder.buildMarkers();
 
     return Scaffold(
       body: Stack(
@@ -237,7 +195,7 @@ class OpenStreetMapState extends State<OpenStreetMap> {
                 urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.app',
               ),
-              MarkerLayer(markers: markers),
+              MarkerLayer(markers: _markers),
               RichAttributionWidget(
                 attributions: [
                   TextSourceAttribution(

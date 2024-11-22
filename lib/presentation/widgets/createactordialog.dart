@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jean_jean/presentation/business_logic/models/aaction.dart';
-import 'package:jean_jean/presentation/business_logic/models/acteur.dart';
-import 'package:jean_jean/presentation/pages/add_actor_form.dart';
 import 'package:latlong2/latlong.dart';
 
 class CreateActorWidget extends StatefulWidget {
@@ -43,6 +40,7 @@ class CreateActorWidgetState extends State<CreateActorWidget> {
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   final actorData = {
+                    'identifiantUnique': DateTime.now().toString(),
                     'nom': _nameController.text,
                     'position': widget.position,
                   };
