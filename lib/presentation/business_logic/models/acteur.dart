@@ -30,7 +30,11 @@ class Acteur {
       nomCommercial: json['nom_commercial'],
       adresse: json['adresse'],
       siret: json['siret'],
-      actions: (json['actions'] as List).map((action) => AAction.fromJson(action)).toList(),
+      actions: 
+      (json['actions'] as List).map((action) => 
+        // Todo: récupérer ça d'un cache plutôt que de faire un nouvel objet
+        AAction.fromJson(action)
+      ).toList(),
 //      actions: (json['actions'] as List).map((action) => action['id'] as int).toList(),
     );
   }

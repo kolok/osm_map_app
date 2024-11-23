@@ -28,10 +28,8 @@ class MarkerBuilder {
 
     return allMarkers.map((item) {
       final markerId = item.identifiantUnique;
-      debugPrint('markerId: $markerId');
       final isSelected = selectedMarkerId == markerId;
       final iconPath = _getIconPath(item.actions);
-      debugPrint('iconPath: $iconPath');
       return Marker(
         key: ValueKey(markerId),
         width: isSelected ? 49.0 : 35.0,

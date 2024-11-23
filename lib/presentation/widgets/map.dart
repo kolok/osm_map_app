@@ -4,7 +4,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jean_jean/presentation/business_logic/models/aaction.dart';
 import 'package:jean_jean/presentation/widgets/createactordialog.dart';
 import 'package:jean_jean/presentation/business_logic/models/marker.dart';
@@ -32,10 +31,10 @@ class OpenStreetMap extends StatefulWidget {
   });
 
   @override
-  OpenStreetMapState createState() => OpenStreetMapState();
+  State<OpenStreetMap> createState() => _OpenStreetMapState();
 }
 
-class OpenStreetMapState extends State<OpenStreetMap> {
+class _OpenStreetMapState extends State<OpenStreetMap> {
   List<Acteur> _markerData = [];
   final List<Acteur> _localActors = [];
   List<Marker> _markers= [];
@@ -49,10 +48,12 @@ class OpenStreetMapState extends State<OpenStreetMap> {
   String? _selectedMarkerId;
   final PanelController _panelController = PanelController();
   final ApiService _apiService = ApiService();
+  Map<String, AAction>? _actionMap = {};
 
   @override
   void initState() {
     super.initState();
+    _fetchActions();
     widget.mapController.mapEventStream.listen((event) {
       if (event is MapEventMoveEnd) {
         var camera = event.camera;
@@ -61,6 +62,17 @@ class OpenStreetMapState extends State<OpenStreetMap> {
     });
     _fetchMarkers(
         widget.initialPosition.latitude, widget.initialPosition.longitude);
+  }
+
+  Future<void> _fetchActions() async {
+    try {
+      final actions = await AAction.getActionList();
+      setState(() {
+        _actionMap = actions;
+      });
+    } catch (e) {
+      _showErrorDialog('Erreur', e.toString());
+    }
   }
 
   Future<void> _fetchMarkers(double latitude, double longitude) async {
@@ -140,7 +152,7 @@ class OpenStreetMapState extends State<OpenStreetMap> {
           latitude: result['position'].latitude,
           longitude: result['position'].longitude,
           nom: result['nom'],
-          actions: [AAction(code: 'reparer', libelle: 'Réparer', id: 0)],
+          actions: [],
         ));
       });
     }

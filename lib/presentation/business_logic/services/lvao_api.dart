@@ -3,10 +3,12 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/acteur.dart';
+
+//const HOST of API
+const String lvaoApiHost = 'https://quefairedemesobjets-preprod.osc-fr1.scalingo.io/api/qfdmo';
 
 class ApiService {
   static const Duration requestTimeout = Duration(seconds: 30);
@@ -20,12 +22,10 @@ class ApiService {
 
     final response = await http
         .get(Uri.parse(
-            'https://quefairedemesobjets-preprod.osc-fr1.scalingo.io/api/qfdmo/acteurs?latitude=$latitude&longitude=$longitude$actions&limit=25'))
+            '$lvaoApiHost/acteurs?latitude=$latitude&longitude=$longitude$actions&limit=25'))
         .timeout(requestTimeout);
-    debugPrint('https://quefairedemesobjets-preprod.osc-fr1.scalingo.io/api/qfdmo/acteurs?latitude=$latitude&longitude=$longitude$actions&limit=25');
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      debugPrint('response.body: $data');
       List<Acteur> acteurs = (data['items'] as List)
           .map((item) => Acteur.fromJson(item))
           .toList();
@@ -37,6 +37,20 @@ class ApiService {
       }
 
       return uniqueActeurs.values.toList();
+    } else {
+      throw Exception('Erreur ${response.statusCode}');
+    }
+  }
+
+  Future<List> fetchActions() async {
+    final response = await http
+        .get(Uri.parse(
+            '$lvaoApiHost/actions'))
+        .timeout(requestTimeout);
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+
     } else {
       throw Exception('Erreur ${response.statusCode}');
     }
