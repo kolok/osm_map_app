@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jean_jean/presentation/widgets/map/slidepanel.dart';
+import 'package:jean_jean/presentation/widgets/map/slide_panel_widget.dart';
 
 void main() {
   group('PanelWidget', () {
     testWidgets('displays the selected actor name', (WidgetTester tester) async {
       // Arrange
       const selectedActorName = 'Test Actor';
-      final panelWidget = PanelWidget(
+      final panelWidget = SlidePanelWidget(
         selectedActorName: selectedActorName,
         onClose: () {},
       );
@@ -28,7 +28,7 @@ void main() {
     testWidgets('calls onClose when close button is pressed', (WidgetTester tester) async {
       // Arrange
       bool onCloseCalled = false;
-      final panelWidget = PanelWidget(
+      final panelWidget = SlidePanelWidget(
         selectedActorName: 'Test Actor',
         onClose: () {
           onCloseCalled = true;

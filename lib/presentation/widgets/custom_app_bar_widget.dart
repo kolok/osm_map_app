@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+class CustomAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final Widget Function({required LatLng initialPosition, required double zoom}) nextScreen;
   final MapController mapController;
 
-  const CustomAppBar({
+  const CustomAppBarWidget({
     super.key,
     required this.title,
     required this.nextScreen,

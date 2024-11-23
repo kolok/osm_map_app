@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 
-class FlutterMapZoomButtons extends StatelessWidget {
+class ZoomButtonsWidget extends StatelessWidget {
   final double minZoom;
   final double maxZoom;
   final bool mini;
@@ -16,7 +16,7 @@ class FlutterMapZoomButtons extends StatelessWidget {
   final IconData zoomInIcon;
   final IconData zoomOutIcon;
 
-  const FlutterMapZoomButtons({
+  const ZoomButtonsWidget({
     super.key,
     this.minZoom = 1,
     this.maxZoom = 18,

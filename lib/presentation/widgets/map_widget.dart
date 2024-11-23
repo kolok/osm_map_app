@@ -5,7 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:jean_jean/presentation/business_logic/models/aaction.dart';
-import 'package:jean_jean/presentation/widgets/createactordialog.dart';
+import 'package:jean_jean/presentation/widgets/create_actor_widget.dart';
 import 'package:jean_jean/presentation/business_logic/models/marker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
@@ -13,16 +13,16 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../business_logic/models/acteur.dart';
 import '../business_logic/services/lvao_api.dart';
-import 'map/slidepanel.dart';
-import 'map/zoombuttons.dart'; // Si vous avez un widget ZoomButtons
+import 'map/slide_panel_widget.dart';
+import 'map/zoom_buttons_widget.dart'; // Si vous avez un widget ZoomButtons
 
-class OpenStreetMap extends StatefulWidget {
+class MapWidget extends StatefulWidget {
   final MapController mapController;
   final LatLng initialPosition;
   final double zoom;
   final List<int>? actionIds;
 
-  const OpenStreetMap({
+  const MapWidget({
     super.key,
     required this.mapController,
     required this.initialPosition,
@@ -31,10 +31,10 @@ class OpenStreetMap extends StatefulWidget {
   });
 
   @override
-  State<OpenStreetMap> createState() => _OpenStreetMapState();
+  State<MapWidget> createState() => _MapWidgetState();
 }
 
-class _OpenStreetMapState extends State<OpenStreetMap> {
+class _MapWidgetState extends State<MapWidget> {
   List<Acteur> _markerData = [];
   final List<Acteur> _localActors = [];
   List<Marker> _markers= [];
@@ -216,7 +216,7 @@ class _OpenStreetMapState extends State<OpenStreetMap> {
                   ),
                 ],
               ),
-              FlutterMapZoomButtons(
+              ZoomButtonsWidget(
                 mapController: widget.mapController,
                 minZoom: 2,
                 maxZoom: 19,
@@ -236,7 +236,7 @@ class _OpenStreetMapState extends State<OpenStreetMap> {
               snapPoint: 0.5,
               maxHeight: MediaQuery.of(context).size.height,
               backdropEnabled: true,
-              panel: PanelWidget(onClose: _closePanel,
+              panel: SlidePanelWidget(onClose: _closePanel,
               selectedActorName: _selectedActorName,
 
               )

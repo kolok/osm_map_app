@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class PanelWidget extends StatelessWidget {
+class SlidePanelWidget extends StatelessWidget {
   final String selectedActorName;
   final VoidCallback onClose;
 
-  const PanelWidget({
+  const SlidePanelWidget({
     super.key,
     required this.selectedActorName,
     required this.onClose,

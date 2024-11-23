@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:jean_jean/presentation/widgets/custom_app_bar.dart';
-import 'package:jean_jean/presentation/widgets/map.dart';
+import 'package:jean_jean/presentation/widgets/custom_app_bar_widget.dart';
+import 'package:jean_jean/presentation/widgets/map_widget.dart';
 import 'package:latlong2/latlong.dart';
 import 'jean_trouvou.dart'; // Importez le fichier jean_trouvou.dart
 
@@ -21,12 +21,12 @@ class JeanFequoiState extends State<JeanFequoi> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
+      appBar: CustomAppBarWidget(
         title: "Jean Féquoi",
         nextScreen: ({required LatLng initialPosition, required double zoom}) => JeanTrouvou(initialPosition: initialPosition, zoom: zoom),
         mapController: _mapController,
       ),
-      body: OpenStreetMap(
+      body: MapWidget(
         mapController: _mapController,
         initialPosition: widget.initialPosition,
         zoom: widget.zoom,
