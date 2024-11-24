@@ -25,7 +25,7 @@ class AAction {
       return _actionList!;
     }
 
-    List apiResponse = await ApiService().fetchActions();
+    List apiResponse = await ApiService().getActionList();
 
     final actionList = apiResponse
           .map<AAction>((item) => AAction.fromJson(item))

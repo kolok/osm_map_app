@@ -20,7 +20,7 @@ void main() {
         {'id': 1, 'code': 'trier', 'libelle': 'Trier'},
         {'id': 2, 'code': 'reparer', 'libelle': 'Réparer'},
       ];
-      when(mockApiService.fetchActions()).thenAnswer((_) async => mockActions);
+      when(mockApiService.getActionList()).thenAnswer((_) async => mockActions);
 
       // Act
       final actionList = await AAction.getActionList();

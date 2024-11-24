@@ -30,6 +30,7 @@ class JeanTrouvouState extends State<JeanTrouvou> {
         mapController: _mapController,
         initialPosition: widget.initialPosition,
         zoom: widget.zoom,
+        // TODO : Utiliser les codes au lieu des ids
         actionIds: [ 7, 5, 9, 2 ],
       ),
     );

@@ -8,6 +8,7 @@ import 'package:latlong2/latlong.dart';
 import 'acteur.dart';
 import 'aaction.dart';
 
+// TODO : Utiliser les actions visibles sur la carte pour sélectionner l'icône de l'acteur
 class MarkerBuilder {
   final List<Acteur> markerData;
   final List<Acteur> localActors;

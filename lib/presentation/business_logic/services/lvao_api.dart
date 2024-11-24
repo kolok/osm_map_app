@@ -13,8 +13,7 @@ const String lvaoApiHost = 'https://quefairedemesobjets-preprod.osc-fr1.scalingo
 class ApiService {
   static const Duration requestTimeout = Duration(seconds: 30);
 
-  Future<List<Acteur>> fetchMarkers(
-      double latitude, double longitude, List<int>? actionIds) async {
+  Future<List> getActeurList(double latitude, double longitude, List<int>? actionIds) async {
     String actions = '';
     if (actionIds != null) {
       actions = actionIds.map((id) => '&actions=$id').join('&');
@@ -24,25 +23,17 @@ class ApiService {
         .get(Uri.parse(
             '$lvaoApiHost/acteurs?latitude=$latitude&longitude=$longitude$actions&limit=25'))
         .timeout(requestTimeout);
+
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      List<Acteur> acteurs = (data['items'] as List)
-          .map((item) => Acteur.fromJson(item))
-          .toList();
+      var data = json.decode(response.body);
+      return data['items'] as List;
 
-      // Dédupliquer les items selon la clé identifiant_unique
-      final uniqueActeurs = <String, Acteur>{};
-      for (var acteur in acteurs) {
-        uniqueActeurs[acteur.identifiantUnique] = acteur;
-      }
-
-      return uniqueActeurs.values.toList();
     } else {
       throw Exception('Erreur ${response.statusCode}');
     }
   }
 
-  Future<List> fetchActions() async {
+  Future<List> getActionList() async {
     final response = await http
         .get(Uri.parse(
             '$lvaoApiHost/actions'))

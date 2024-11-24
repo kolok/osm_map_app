@@ -1,4 +1,5 @@
 import 'package:jean_jean/presentation/business_logic/models/aaction.dart';
+import 'package:jean_jean/presentation/business_logic/services/lvao_api.dart';
 
 class Acteur {
   final String identifiantUnique;
@@ -35,7 +36,24 @@ class Acteur {
         // Todo: récupérer ça d'un cache plutôt que de faire un nouvel objet
         AAction.fromJson(action)
       ).toList(),
-//      actions: (json['actions'] as List).map((action) => action['id'] as int).toList(),
     );
+  }
+
+  static Future<List<Acteur>> getActeurList(
+    double latitude, double longitude, List<int>? actionIds) async {
+
+    List apiResponse = await ApiService().getActeurList(latitude, longitude, actionIds);
+
+    final acteurList = apiResponse
+          .map<Acteur>((item) => Acteur.fromJson(item))
+          .toList();
+
+    // Dédupliquer les items selon la clé identifiant_unique
+    final uniqueActeurs = <String, Acteur>{};
+    for (var acteur in acteurList) {
+      uniqueActeurs[acteur.identifiantUnique] = acteur;
+    }
+
+    return uniqueActeurs.values.toList();
   }
 }

@@ -44,16 +44,14 @@ class _MapWidgetState extends State<MapWidget> {
     selectedMarkerId: '',
     onMarkerTap: (markerId) {},
   );
+  // TODO : Utiliser un Objet Acteur directement
   String _selectedActorName = '';
   String? _selectedMarkerId;
   final PanelController _panelController = PanelController();
-  final ApiService _apiService = ApiService();
-  Map<String, AAction>? _actionMap = {};
 
   @override
   void initState() {
     super.initState();
-    _fetchActions();
     widget.mapController.mapEventStream.listen((event) {
       if (event is MapEventMoveEnd) {
         var camera = event.camera;
@@ -64,24 +62,16 @@ class _MapWidgetState extends State<MapWidget> {
         widget.initialPosition.latitude, widget.initialPosition.longitude);
   }
 
-  Future<void> _fetchActions() async {
-    try {
-      final actions = await AAction.getActionList();
-      setState(() {
-        _actionMap = actions;
-      });
-    } catch (e) {
-      _showErrorDialog('Erreur', e.toString());
-    }
-  }
 
   Future<void> _fetchMarkers(double latitude, double longitude) async {
     try {
-      final markers = await _apiService.fetchMarkers(
+      final markers = await Acteur.getActeurList(
           latitude, longitude, widget.actionIds);
-      setState(() {
-        _markerData = markers;
-      });
+      if (mounted) {
+        setState(() {
+          _markerData = markers;
+        });
+      }
     } catch (e) {
       _showErrorDialog('Erreur', e.toString());
     }
@@ -104,7 +94,8 @@ class _MapWidgetState extends State<MapWidget> {
           ],
         );
       },
-    );  }
+    );
+  }
 
 
   void _showAddActorDialog(LatLng position) {
@@ -136,7 +127,6 @@ class _MapWidgetState extends State<MapWidget> {
 
 
   void _createActor(LatLng position) async {
-  
     // Naviguer vers le CreateActorWidget et attendre le résultat
     final result = await Navigator.of(context).push(
       MaterialPageRoute(
@@ -146,23 +136,27 @@ class _MapWidgetState extends State<MapWidget> {
   
     // Si le résultat n'est pas nul, ajouter le nouvel acteur au state
     if (result != null) {
-      setState(() {
-        _localActors.add(Acteur(
-          identifiantUnique: result['identifiantUnique'],
-          latitude: result['position'].latitude,
-          longitude: result['position'].longitude,
-          nom: result['nom'],
-          actions: [],
-        ));
-      });
+      if (mounted) {
+        setState(() {
+          _localActors.add(Acteur(
+            identifiantUnique: result['identifiantUnique'],
+            latitude: result['position'].latitude,
+            longitude: result['position'].longitude,
+            nom: result['nom'],
+            actions: [],
+          ));
+        });
+      }  
     }
   }
 
   void _closePanel() {
-    setState(() {
-      _selectedActorName = '';
-      _selectedMarkerId = null;
-    });
+    if (mounted) {
+      setState(() {
+        _selectedActorName = '';
+        _selectedMarkerId = null;
+      });
+    }
     _panelController.close();
   }
 
@@ -174,13 +168,15 @@ class _MapWidgetState extends State<MapWidget> {
       localActors: _localActors,
       selectedMarkerId: _selectedMarkerId,
       onMarkerTap: (markerId) {
-        setState(() {
-          final allMarkersData = [..._markerData, ..._localActors];
-          _selectedActorName = allMarkersData
-              .firstWhere((acteur) => acteur.identifiantUnique == markerId)
-              .nom;
-          _selectedMarkerId = markerId;
-        });
+        if (mounted) {
+          setState(() {
+            final allMarkersData = [..._markerData, ..._localActors];
+            _selectedActorName = allMarkersData
+                .firstWhere((acteur) => acteur.identifiantUnique == markerId)
+                .nom;
+            _selectedMarkerId = markerId;
+          });
+        }
       },
     );
 

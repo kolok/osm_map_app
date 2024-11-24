@@ -30,6 +30,7 @@ class JeanFequoiState extends State<JeanFequoi> {
         mapController: _mapController,
         initialPosition: widget.initialPosition,
         zoom: widget.zoom,
+        // TODO : Utiliser les codes au lieu des ids
         actionIds: [ 8, 6, 1, 9, 3, 11, 4 ],
       ),
     );
