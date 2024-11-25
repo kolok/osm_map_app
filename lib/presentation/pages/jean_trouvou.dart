@@ -31,7 +31,8 @@ class JeanTrouvouState extends State<JeanTrouvou> {
         initialPosition: widget.initialPosition,
         zoom: widget.zoom,
         // TODO : Utiliser les codes au lieu des ids
-        actionIds: [ 7, 5, 9, 2 ],
+        // actionIds: [ 7, 5, 9, 2 ],
+        actionCodes: [ 'echanger', 'emprunter', 'louer', 'acheter' ],
       ),
     );
   }

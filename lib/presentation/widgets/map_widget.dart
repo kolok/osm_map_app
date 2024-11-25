@@ -20,14 +20,14 @@ class MapWidget extends StatefulWidget {
   final MapController mapController;
   final LatLng initialPosition;
   final double zoom;
-  final List<int>? actionIds;
+  final List<String>? actionCodes;
 
   const MapWidget({
     super.key,
     required this.mapController,
     required this.initialPosition,
     required this.zoom,
-    this.actionIds,
+    this.actionCodes,
   });
 
   @override
@@ -42,31 +42,56 @@ class _MapWidgetState extends State<MapWidget> {
     markerData: [],
     localActors: [],
     selectedMarkerId: '',
+    actionCodes: [],
     onMarkerTap: (markerId) {},
   );
   // TODO : Utiliser un Objet Acteur directement
   String _selectedActorName = '';
   String? _selectedMarkerId;
   final PanelController _panelController = PanelController();
+  // TODO : utiliser _actionMap ?
+  // Map<String, AAction>? _actionMap = {};
+  final List<int> _actionIds = [];
 
   @override
   void initState() {
     super.initState();
+    _initializeActors();
     widget.mapController.mapEventStream.listen((event) {
       if (event is MapEventMoveEnd) {
         var camera = event.camera;
         _fetchMarkers(camera.center.latitude, camera.center.longitude);
       }
     });
-    _fetchMarkers(
+  }
+
+  _initializeActors() async {
+    await _findActionIds();
+    await _fetchMarkers(
         widget.initialPosition.latitude, widget.initialPosition.longitude);
   }
 
+  Future<void> _findActionIds() async{
+    if (widget.actionCodes == null) {
+      return;
+    }
+    final actionIds = <int>[];
+    Map<String,AAction>? actions = await AAction.getActionList();
+    for (final code in widget.actionCodes!) {
+      final action = actions![code];
+      actionIds.add(action!.id);
+    }
+    if (mounted) {
+      setState(() {
+        _actionIds.addAll(actionIds);
+      });
+    }
+  }
 
   Future<void> _fetchMarkers(double latitude, double longitude) async {
     try {
       final markers = await Acteur.getActeurList(
-          latitude, longitude, widget.actionIds);
+          latitude, longitude, _actionIds);
       if (mounted) {
         setState(() {
           _markerData = markers;
@@ -167,6 +192,7 @@ class _MapWidgetState extends State<MapWidget> {
       markerData: _markerData,
       localActors: _localActors,
       selectedMarkerId: _selectedMarkerId,
+      actionCodes: widget.actionCodes,
       onMarkerTap: (markerId) {
         if (mounted) {
           setState(() {

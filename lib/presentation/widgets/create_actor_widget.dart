@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_dragmarker/flutter_map_dragmarker.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:jean_jean/presentation/widgets/map/zoom_buttons_widget.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'package:jean_jean/presentation/business_logic/services/ban_api.dart';
@@ -53,84 +54,100 @@ class CreateActorWidgetState extends State<CreateActorWidget> {
       appBar: AppBar(
         title: Text('Proposer un nouvel acteur'),
       ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            // Champs du formulaire
-            TextFormField(
-              controller: _nameController,
-              decoration: InputDecoration(labelText: 'Nom'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Veuillez entrer un nom';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: 20),
-            Container(
-              height: 300, // Fixe la hauteur de la carte
-              child: FlutterMap(
-                mapController: _mapController,
-                options: MapOptions(
-                  initialCenter: _currentPosition,
-                  initialZoom: 17,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                // Champs du formulaire
+                TextFormField(
+                  controller: _nameController,
+                  decoration: InputDecoration(labelText: 'Nom'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer un nom';
+                    }
+                    return null;
+                  },
                 ),
-                children: [
-                  TileLayer(
-                    urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'com.example.app',
-                  ),
-                  DragMarkers(
-                    markers: [
-                      DragMarker(
-                        size: Size(35.0,50.0),
-                        alignment: Alignment.topCenter,
-                        point: _currentPosition,
-                        offset: const Offset(0.0, -8.0),
-                        builder: (_, __, ___) => SvgPicture.asset(
-                          'assets/images/pin.svg',
-                          fit: BoxFit.fill,
-                          allowDrawingOutsideViewBox: true,
-                        ),
-                        onDragEnd: (details, latLng) async {
-                          final String address = await banApiService.getAddressFromLatLng(latLng);
-                          if (mounted) {
-                            setState(() {
-                              _currentPosition = latLng;
-                              _addressController.text = address;
-                            });
-                          }
-                        },
+                SizedBox(height: 20),
+                Container(
+                  height: 300, // Fixe la hauteur de la carte
+                  child: FlutterMap(
+                    mapController: _mapController,
+                    options: MapOptions(
+                      initialCenter: _currentPosition,
+                      initialZoom: 17,
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.example.app',
                       ),
-                    ],
+                      DragMarkers(
+                        markers: [
+                          DragMarker(
+                            size: Size(35.0,50.0),
+                            alignment: Alignment.topCenter,
+                            point: _currentPosition,
+                            offset: const Offset(0.0, -8.0),
+                            builder: (_, __, ___) => SvgPicture.asset(
+                              'assets/images/pin.svg',
+                              fit: BoxFit.fill,
+                              allowDrawingOutsideViewBox: true,
+                            ),
+                            onDragEnd: (details, latLng) async {
+                              final String address = await banApiService.getAddressFromLatLng(latLng);
+                              if (mounted) {
+                                setState(() {
+                                  _currentPosition = latLng;
+                                  _addressController.text = address;
+                                });
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                      ZoomButtonsWidget(
+                        mapController: _mapController,
+                        minZoom: 2,
+                        maxZoom: 19,
+                        padding: 5,
+                        zoomInColor: Colors.grey,
+                        zoomInColorIcon: Colors.black,
+                        zoomOutColor: Colors.grey,
+                        zoomOutColorIcon: Colors.black,
+                        alignment: Alignment.bottomRight,
+                      ),
+                    ]
                   ),
-                ]
-              ),
+                ),
+                SizedBox(height: 20),
+                TextFormField(
+                  controller: _addressController,
+                  decoration: InputDecoration(labelText: 'Adresse'),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      final actorData = {
+                        'identifiantUnique': DateTime.now().toString(),
+                        'nom': _nameController.text,
+                        'position': _currentPosition,
+                      };
+                      if (mounted) {
+                        Navigator.of(context).pop(actorData);
+                      }
+                    }
+                  },
+                  child: Text('Enregistrer'),
+                ),
+              ],
             ),
-            SizedBox(height: 20),
-            TextFormField(
-              controller: _addressController,
-              decoration: InputDecoration(labelText: 'Adresse'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  final actorData = {
-                    'identifiantUnique': DateTime.now().toString(),
-                    'nom': _nameController.text,
-                    'position': _currentPosition,
-                  };
-                  if (mounted) {
-                    Navigator.of(context).pop(actorData);
-                  }
-                }
-              },
-              child: Text('Enregistrer'),
-            ),
-          ],
+          ),
         ),
       ),
     );

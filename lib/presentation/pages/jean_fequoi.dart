@@ -31,7 +31,8 @@ class JeanFequoiState extends State<JeanFequoi> {
         initialPosition: widget.initialPosition,
         zoom: widget.zoom,
         // TODO : Utiliser les codes au lieu des ids
-        actionIds: [ 8, 6, 1, 9, 3, 11, 4 ],
+        //actionIds: [ 8, 6, 1, 9, 3, 11, 4 ],
+        actionCodes: [ 'reparer', 'donner', 'echanger', 'preter', 'mettreenlocation', 'revendre', 'trier' ], 
       ),
     );
   }

@@ -14,12 +14,14 @@ class MarkerBuilder {
   final List<Acteur> localActors;
   final String? selectedMarkerId;
   final Function(String) onMarkerTap;
+  final List<String>? actionCodes;
 
   MarkerBuilder({
     required this.markerData,
     required this.localActors,
     required this.selectedMarkerId,
     required this.onMarkerTap,
+    required this.actionCodes,
   });
 
   List<Marker> buildMarkers() {
@@ -59,15 +61,17 @@ class MarkerBuilder {
       'preter': 'assets/images/pin_preter_emprunter_louer.svg',
       'emprunter': 'assets/images/pin_preter_emprunter_louer.svg',
       'louer': 'assets/images/pin_preter_emprunter_louer.svg',
-      'miseenlocation': 'assets/images/pin_preter_emprunter_louer.svg',
+      'mettreenlocation': 'assets/images/pin_preter_emprunter_louer.svg',
       'acheter': 'assets/images/pin_acheter_vendre.svg',
-      'vendre': 'assets/images/pin_acheter_vendre.svg',
+      'revendre': 'assets/images/pin_acheter_vendre.svg',
       'trier': 'assets/images/pin_trier.svg',
     };
 
     for (var action in actions) {
       if (actionIconMap.containsKey(action.code)) {
-        return actionIconMap[action.code]!;
+        if (actionCodes == null || actionCodes!.contains(action.code)) {
+          return actionIconMap[action.code]!;
+        }
       }
     }
     return 'assets/images/pin.svg';
