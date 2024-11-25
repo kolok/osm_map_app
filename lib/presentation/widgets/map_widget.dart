@@ -5,8 +5,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:jean_jean/presentation/business_logic/models/aaction.dart';
+import 'package:jean_jean/presentation/widgets/add_actor_dialog.dart';
 import 'package:jean_jean/presentation/widgets/create_actor_widget.dart';
 import 'package:jean_jean/presentation/business_logic/models/marker.dart';
+import 'package:jean_jean/presentation/widgets/error_dialog.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -60,14 +62,14 @@ class _MapWidgetState extends State<MapWidget> {
     widget.mapController.mapEventStream.listen((event) {
       if (event is MapEventMoveEnd) {
         var camera = event.camera;
-        _fetchMarkers(camera.center.latitude, camera.center.longitude);
+        _fetchMarkerData(camera.center.latitude, camera.center.longitude);
       }
     });
   }
 
   _initializeActors() async {
     await _findActionIds();
-    await _fetchMarkers(
+    await _fetchMarkerData(
         widget.initialPosition.latitude, widget.initialPosition.longitude);
   }
 
@@ -88,7 +90,7 @@ class _MapWidgetState extends State<MapWidget> {
     }
   }
 
-  Future<void> _fetchMarkers(double latitude, double longitude) async {
+  Future<void> _fetchMarkerData(double latitude, double longitude) async {
     try {
       final markers = await Acteur.getActeurList(
           latitude, longitude, _actionIds);
@@ -106,17 +108,9 @@ class _MapWidgetState extends State<MapWidget> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+        return ErrorDialog(
+          title: title,
+          message: message,
         );
       },
     );
@@ -127,24 +121,12 @@ class _MapWidgetState extends State<MapWidget> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Ajouter un acteur'),
-          content: Text('Voulez-vous ajouter un acteur de l\'économie circulaire à cet endroit ?'),
-          actions: [
-            TextButton(
-              child: Text('Annuler'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Ajouter'),
-              onPressed: () async {
-                Navigator.of(context).pop();
-                _createActor(position);
-              },
-            ),
-          ],
+        return AddActorDialog(
+          title: 'Ajouter un acteur',
+          message: 'Voulez-vous ajouter un acteur de l\'économie circulaire à cet endroit ?',
+          successAction: () {
+            _createActor(position);
+          },
         );
       },
     );

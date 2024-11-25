@@ -5,7 +5,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../models/acteur.dart';
 
 //const HOST of API
 const String lvaoApiHost = 'https://quefairedemesobjets-preprod.osc-fr1.scalingo.io/api/qfdmo';
