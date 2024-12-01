@@ -32,7 +32,7 @@ class MarkerBuilder {
     return allMarkers.map((item) {
       final markerId = item.identifiantUnique;
       final isSelected = selectedMarkerId == markerId;
-      final iconPath = _getIconPath(item.actions);
+      final iconPath = _getIconPath(item.actions ?? []);
       return Marker(
         key: ValueKey(markerId),
         width: isSelected ? 49.0 : 35.0,
@@ -78,7 +78,6 @@ class MarkerBuilder {
   }
 
   void _reorderMarkers(List<Acteur> allMarkers) {
-
     allMarkers.sort((a, b) {
       if (a.identifiantUnique == selectedMarkerId) {
         return 1;
@@ -88,6 +87,5 @@ class MarkerBuilder {
         return 0;
       }
     });
-
   }
 }

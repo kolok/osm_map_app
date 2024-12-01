@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_dragmarker/flutter_map_dragmarker.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:jean_jean/presentation/business_logic/models/acteur.dart';
 import 'package:jean_jean/presentation/widgets/map/zoom_buttons_widget.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'package:jean_jean/presentation/business_logic/services/ban_api.dart';
 
 class CreateActorWidget extends StatefulWidget {
-  final LatLng position;
+  final Acteur acteur;
 
-  const CreateActorWidget({super.key, required this.position});
+  const CreateActorWidget({
+    super.key,
+    required this.acteur,
+  });
 
   @override
   CreateActorWidgetState createState() => CreateActorWidgetState();
@@ -27,7 +31,8 @@ class CreateActorWidgetState extends State<CreateActorWidget> {
   @override
   void initState() {
     super.initState();
-    _currentPosition = widget.position;
+    // from widget acteur
+    _currentPosition = LatLng(widget.acteur.latitude, widget.acteur.longitude);
     _initializeAddress();
   }
 
@@ -76,53 +81,54 @@ class CreateActorWidgetState extends State<CreateActorWidget> {
                 Container(
                   height: 300, // Fixe la hauteur de la carte
                   child: FlutterMap(
-                    mapController: _mapController,
-                    options: MapOptions(
-                      initialCenter: _currentPosition,
-                      initialZoom: 17,
-                    ),
-                    children: [
-                      TileLayer(
-                        urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-                        userAgentPackageName: 'com.example.app',
+                      mapController: _mapController,
+                      options: MapOptions(
+                        initialCenter: _currentPosition,
+                        initialZoom: 17,
                       ),
-                      DragMarkers(
-                        markers: [
-                          DragMarker(
-                            size: Size(35.0,50.0),
-                            alignment: Alignment.topCenter,
-                            point: _currentPosition,
-                            offset: const Offset(0.0, -8.0),
-                            builder: (_, __, ___) => SvgPicture.asset(
-                              'assets/images/pin.svg',
-                              fit: BoxFit.fill,
-                              allowDrawingOutsideViewBox: true,
+                      children: [
+                        TileLayer(
+                          urlTemplate:
+                              'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+                          userAgentPackageName: 'com.example.app',
+                        ),
+                        DragMarkers(
+                          markers: [
+                            DragMarker(
+                              size: Size(35.0, 50.0),
+                              alignment: Alignment.topCenter,
+                              point: _currentPosition,
+                              offset: const Offset(0.0, -8.0),
+                              builder: (_, __, ___) => SvgPicture.asset(
+                                'assets/images/pin.svg',
+                                fit: BoxFit.fill,
+                                allowDrawingOutsideViewBox: true,
+                              ),
+                              onDragEnd: (details, latLng) async {
+                                final String address = await banApiService
+                                    .getAddressFromLatLng(latLng);
+                                if (mounted) {
+                                  setState(() {
+                                    _currentPosition = latLng;
+                                    _addressController.text = address;
+                                  });
+                                }
+                              },
                             ),
-                            onDragEnd: (details, latLng) async {
-                              final String address = await banApiService.getAddressFromLatLng(latLng);
-                              if (mounted) {
-                                setState(() {
-                                  _currentPosition = latLng;
-                                  _addressController.text = address;
-                                });
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                      ZoomButtonsWidget(
-                        mapController: _mapController,
-                        minZoom: 2,
-                        maxZoom: 19,
-                        padding: 5,
-                        zoomInColor: Colors.grey,
-                        zoomInColorIcon: Colors.black,
-                        zoomOutColor: Colors.grey,
-                        zoomOutColorIcon: Colors.black,
-                        alignment: Alignment.bottomRight,
-                      ),
-                    ]
-                  ),
+                          ],
+                        ),
+                        ZoomButtonsWidget(
+                          mapController: _mapController,
+                          minZoom: 2,
+                          maxZoom: 19,
+                          padding: 5,
+                          zoomInColor: Colors.grey,
+                          zoomInColorIcon: Colors.black,
+                          zoomOutColor: Colors.grey,
+                          zoomOutColorIcon: Colors.black,
+                          alignment: Alignment.bottomRight,
+                        ),
+                      ]),
                 ),
                 SizedBox(height: 20),
                 TextFormField(

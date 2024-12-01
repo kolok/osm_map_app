@@ -39,7 +39,7 @@ class MapWidget extends StatefulWidget {
 class _MapWidgetState extends State<MapWidget> {
   List<Acteur> _markerData = [];
   final List<Acteur> _localActors = [];
-  List<Marker> _markers= [];
+  List<Marker> _markers = [];
   MarkerBuilder _markerBuilder = MarkerBuilder(
     markerData: [],
     localActors: [],
@@ -73,12 +73,12 @@ class _MapWidgetState extends State<MapWidget> {
         widget.initialPosition.latitude, widget.initialPosition.longitude);
   }
 
-  Future<void> _findActionIds() async{
+  Future<void> _findActionIds() async {
     if (widget.actionCodes == null) {
       return;
     }
     final actionIds = <int>[];
-    Map<String,AAction>? actions = await AAction.getActionList();
+    Map<String, AAction>? actions = await AAction.getActionList();
     for (final code in widget.actionCodes!) {
       final action = actions![code];
       actionIds.add(action!.id);
@@ -92,8 +92,8 @@ class _MapWidgetState extends State<MapWidget> {
 
   Future<void> _fetchMarkerData(double latitude, double longitude) async {
     try {
-      final markers = await Acteur.getActeurList(
-          latitude, longitude, _actionIds);
+      final markers =
+          await Acteur.getActeurList(latitude, longitude, _actionIds);
       if (mounted) {
         setState(() {
           _markerData = markers;
@@ -116,14 +116,14 @@ class _MapWidgetState extends State<MapWidget> {
     );
   }
 
-
   void _showAddActorDialog(LatLng position) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AddActorDialog(
           title: 'Ajouter un acteur',
-          message: 'Voulez-vous ajouter un acteur de l\'économie circulaire à cet endroit ?',
+          message:
+              'Voulez-vous ajouter un acteur de l\'économie circulaire à cet endroit ?',
           successAction: () {
             _createActor(position);
           },
@@ -132,15 +132,16 @@ class _MapWidgetState extends State<MapWidget> {
     );
   }
 
-
   void _createActor(LatLng position) async {
     // Naviguer vers le CreateActorWidget et attendre le résultat
     final result = await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => CreateActorWidget(position: position),
+        builder: (context) => CreateActorWidget(
+            acteur: Acteur(
+                latitude: position.latitude, longitude: position.longitude)),
       ),
     );
-  
+
     // Si le résultat n'est pas nul, ajouter le nouvel acteur au state
     if (result != null) {
       if (mounted) {
@@ -153,7 +154,7 @@ class _MapWidgetState extends State<MapWidget> {
             actions: [],
           ));
         });
-      }  
+      }
     }
   }
 
@@ -169,7 +170,6 @@ class _MapWidgetState extends State<MapWidget> {
 
   @override
   Widget build(BuildContext context) {
-
     _markerBuilder = MarkerBuilder(
       markerData: _markerData,
       localActors: _localActors,
@@ -181,7 +181,7 @@ class _MapWidgetState extends State<MapWidget> {
             final allMarkersData = [..._markerData, ..._localActors];
             _selectedActorName = allMarkersData
                 .firstWhere((acteur) => acteur.identifiantUnique == markerId)
-                .nom;
+                .nom!;
             _selectedMarkerId = markerId;
           });
         }
@@ -200,15 +200,15 @@ class _MapWidgetState extends State<MapWidget> {
               initialCenter: widget.initialPosition,
               initialZoom: widget.zoom,
               interactionOptions: InteractionOptions(
-                flags: InteractiveFlag.all - InteractiveFlag.rotate
-              ),
+                  flags: InteractiveFlag.all - InteractiveFlag.rotate),
               onLongPress: (tapPosition, point) {
                 _showAddActorDialog(point);
               },
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+                urlTemplate:
+                    'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.app',
               ),
               MarkerLayer(markers: _markers),
@@ -216,7 +216,8 @@ class _MapWidgetState extends State<MapWidget> {
                 attributions: [
                   TextSourceAttribution(
                     'OpenStreetMap contributors',
-                    onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')),
+                    onTap: () => launchUrl(
+                        Uri.parse('https://openstreetmap.org/copyright')),
                   ),
                 ],
               ),
@@ -235,16 +236,15 @@ class _MapWidgetState extends State<MapWidget> {
           ),
           if (_selectedActorName.isNotEmpty)
             SlidingUpPanel(
-              controller: _panelController,
-              minHeight: MediaQuery.of(context).size.height / 3,
-              snapPoint: 0.5,
-              maxHeight: MediaQuery.of(context).size.height,
-              backdropEnabled: true,
-              panel: SlidePanelWidget(onClose: _closePanel,
-              selectedActorName: _selectedActorName,
-
-              )
-            ),
+                controller: _panelController,
+                minHeight: MediaQuery.of(context).size.height / 3,
+                snapPoint: 0.5,
+                maxHeight: MediaQuery.of(context).size.height,
+                backdropEnabled: true,
+                panel: SlidePanelWidget(
+                  onClose: _closePanel,
+                  selectedActorName: _selectedActorName,
+                )),
         ],
       ),
     );

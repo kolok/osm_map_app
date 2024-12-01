@@ -5,22 +5,22 @@ class Acteur {
   final String identifiantUnique;
   final double latitude;
   final double longitude;
-  final String nom;
+  final String? nom;
   final String? nomCommercial;
   final String? adresse;
   final String? siret;
-  final List<AAction> actions;
+  final List<AAction>? actions;
 
   Acteur({
-    required this.identifiantUnique,
+    String? identifiantUnique,
     required this.latitude,
     required this.longitude,
-    required this.nom,
-    required this.actions,
+    this.nom,
+    this.actions,
     this.nomCommercial,
     this.adresse,
     this.siret,
-  });
+  }) : identifiantUnique = identifiantUnique ?? DateTime.now().toString();
 
   factory Acteur.fromJson(Map<String, dynamic> json) {
     return Acteur(
@@ -31,22 +31,19 @@ class Acteur {
       nomCommercial: json['nom_commercial'],
       adresse: json['adresse'],
       siret: json['siret'],
-      actions: 
-      (json['actions'] as List).map((action) => 
-        // Todo: récupérer ça d'un cache plutôt que de faire un nouvel objet
-        AAction.fromJson(action)
-      ).toList(),
+      actions: (json['actions'] as List).map((action) =>
+          // Todo: récupérer ça d'un cache plutôt que de faire un nouvel objet
+          AAction.fromJson(action)).toList(),
     );
   }
 
   static Future<List<Acteur>> getActeurList(
-    double latitude, double longitude, List<int>? actionIds) async {
+      double latitude, double longitude, List<int>? actionIds) async {
+    List apiResponse =
+        await ApiService().getActeurList(latitude, longitude, actionIds);
 
-    List apiResponse = await ApiService().getActeurList(latitude, longitude, actionIds);
-
-    final acteurList = apiResponse
-          .map<Acteur>((item) => Acteur.fromJson(item))
-          .toList();
+    final acteurList =
+        apiResponse.map<Acteur>((item) => Acteur.fromJson(item)).toList();
 
     // Dédupliquer les items selon la clé identifiant_unique
     final uniqueActeurs = <String, Acteur>{};
