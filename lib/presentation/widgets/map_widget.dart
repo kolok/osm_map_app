@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:jean_jean/presentation/business_logic/models/aaction.dart';
 import 'package:jean_jean/presentation/widgets/add_actor_dialog.dart';
 import 'package:jean_jean/presentation/widgets/create_actor_widget.dart';
@@ -14,7 +15,6 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../business_logic/models/acteur.dart';
-import '../business_logic/services/lvao_api.dart';
 import 'map/slide_panel_widget.dart';
 import 'map/zoom_buttons_widget.dart'; // Si vous avez un widget ZoomButtons
 
@@ -210,6 +210,10 @@ class _MapWidgetState extends State<MapWidget> {
                 urlTemplate:
                     'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.app',
+              ),
+              CurrentLocationLayer(
+                alignPositionOnUpdate: AlignOnUpdate.never,
+                alignDirectionOnUpdate: AlignOnUpdate.never,
               ),
               MarkerLayer(markers: _markers),
               RichAttributionWidget(
